@@ -8,12 +8,12 @@ const Todo = require('./models/Todo');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/todoapp';
+const MONGODB_URI = process.env.MONGODB_URI || process.env.MONGO_URL || process.env.DATABASE_URL || process.env.MONGOURL || 'mongodb://localhost:27017/todoapp';
 
 console.log('🔍 Environment check:');
 console.log('PORT:', PORT);
 console.log('All MongoDB env vars:');
-Object.keys(process.env).filter(key => key.includes('MONGO')).forEach(key => {
+Object.keys(process.env).filter(key => key.includes('MONGO') || key.includes('DATABASE')).forEach(key => {
   console.log(`${key}:`, process.env[key] ? 'Set ✅' : 'Not set ❌');
 });
 console.log('MONGODB_URI:', MONGODB_URI ? 'Set ✅' : 'Not set ❌');
@@ -33,6 +33,8 @@ mongoose.connect(MONGODB_URI, {
   useUnifiedTopology: true,
   serverSelectionTimeoutMS: 5000,
   socketTimeoutMS: 45000
+}).catch(err => {
+  console.log('❌ Initial MongoDB connection failed:', err.message);
 });
 
 mongoose.connection.on('connected', () => {
@@ -51,22 +53,27 @@ mongoose.connection.on('disconnected', () => {
 app.get('/api/todos', async (req, res) => {
   try {
     if (mongoose.connection.readyState !== 1) {
-      return res.status(503).json({ error: 'Database not connected' });
+      return res.json([]);
     }
     const todos = await Todo.find();
     res.json(todos);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.log('Error fetching todos:', error.message);
+    res.json([]);
   }
 });
 
 // POST new todo
 app.post('/api/todos', async (req, res) => {
   try {
+    if (mongoose.connection.readyState !== 1) {
+      return res.status(503).json({ error: 'Database not connected' });
+    }
     const todo = new Todo({ title: req.body.title });
     await todo.save();
     res.status(201).json(todo);
   } catch (error) {
+    console.log('Error creating todo:', error.message);
     res.status(400).json({ error: error.message });
   }
 });
