@@ -13,6 +13,7 @@ const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/todoap
 console.log('🔍 Environment check:');
 console.log('PORT:', PORT);
 console.log('MONGODB_URI:', MONGODB_URI ? 'Set ✅' : 'Not set ❌');
+console.log('MongoDB URI (masked):', MONGODB_URI ? MONGODB_URI.replace(/:\/\/.*@/, '://***@') : 'None');
 
 app.use(cors({
   origin: ['http://localhost:4200', 'https://your-app-name.netlify.app'],
@@ -25,7 +26,10 @@ app.use(express.static(path.join(__dirname, '../frontend/dist/todo-frontend')));
 
 mongoose.connect(MONGODB_URI, {
   useNewUrlParser: true,
-  useUnifiedTopology: true
+  useUnifiedTopology: true,
+  serverSelectionTimeoutMS: 5000,
+  socketTimeoutMS: 45000,
+  bufferMaxEntries: 0
 });
 
 mongoose.connection.on('connected', () => {
@@ -43,6 +47,9 @@ mongoose.connection.on('disconnected', () => {
 // GET all todos
 app.get('/api/todos', async (req, res) => {
   try {
+    if (mongoose.connection.readyState !== 1) {
+      return res.status(503).json({ error: 'Database not connected' });
+    }
     const todos = await Todo.find();
     res.json(todos);
   } catch (error) {
