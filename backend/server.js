@@ -10,6 +10,10 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/todoapp';
 
+console.log('🔍 Environment check:');
+console.log('PORT:', PORT);
+console.log('MONGODB_URI:', MONGODB_URI ? 'Set ✅' : 'Not set ❌');
+
 app.use(cors({
   origin: ['http://localhost:4200', 'https://your-app-name.netlify.app'],
   credentials: true
