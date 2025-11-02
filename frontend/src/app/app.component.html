@@ -1,0 +1,57 @@
+<div class="container">
+  <div class="header">
+    <h1>📝 My To-Do List</h1>
+    <p class="subtitle">Stay organized and productive</p>
+  </div>
+  
+  <div class="add-todo">
+    <input 
+      [(ngModel)]="newTodoTitle" 
+      placeholder="What needs to be done?" 
+      (keyup.enter)="addTodo()"
+      class="todo-input">
+    <button (click)="addTodo()" class="add-btn">+ Add Task</button>
+  </div>
+
+  <div class="stats">
+    <span class="total">Total: {{ todos.length }}</span>
+    <span class="completed">Completed: {{ (todos | filter:'completed':true).length }}</span>
+    <span class="pending">Pending: {{ (todos | filter:'completed':false).length }}</span>
+  </div>
+
+  <ul class="todo-list">
+    <li *ngFor="let todo of todos" class="todo-item" [class.completed]="todo.completed">
+      <div class="todo-content">
+        <input 
+          type="checkbox" 
+          [checked]="todo.completed" 
+          (change)="toggleTodo(todo)"
+          class="todo-checkbox">
+        
+        <div class="todo-text" *ngIf="editingId !== todo._id">
+          <span class="todo-title">{{ todo.title }}</span>
+          <small class="todo-date">{{ todo.createdAt | date:'short' }}</small>
+        </div>
+        
+        <div class="edit-form" *ngIf="editingId === todo._id">
+          <input 
+            [(ngModel)]="editingTitle" 
+            (keyup.enter)="saveEdit(todo)"
+            (keyup.escape)="cancelEdit()"
+            class="edit-input">
+        </div>
+      </div>
+      
+      <div class="todo-actions">
+        <button *ngIf="editingId !== todo._id" (click)="startEdit(todo)" class="edit-btn">✏️</button>
+        <button *ngIf="editingId === todo._id" (click)="saveEdit(todo)" class="save-btn">✅</button>
+        <button *ngIf="editingId === todo._id" (click)="cancelEdit()" class="cancel-btn">❌</button>
+        <button (click)="deleteTodo(todo._id!)" class="delete-btn">🗑️</button>
+      </div>
+    </li>
+  </ul>
+  
+  <div *ngIf="todos.length === 0" class="empty-state">
+    <p>🎉 No tasks yet! Add one above to get started.</p>
+  </div>
+</div>

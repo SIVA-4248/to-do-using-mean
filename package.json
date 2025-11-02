@@ -1,0 +1,13 @@
+{
+  "name": "mean-todo-app",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "cd frontend && npm install && ng build && cd ../backend && npm install",
+    "start": "cd backend && npm start",
+    "heroku-postbuild": "cd frontend && npm install && ng build --configuration production && cd ../backend && npm install"
+  },
+  "engines": {
+    "node": "18.x",
+    "npm": "9.x"
+  }
+}
