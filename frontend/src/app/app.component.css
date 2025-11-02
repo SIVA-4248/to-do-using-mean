@@ -173,12 +173,15 @@ body {
 }
 
 .edit-btn, .save-btn, .cancel-btn, .delete-btn {
-  padding: 8px 12px;
+  padding: 10px 15px;
   border: none;
   border-radius: 8px;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 16px;
   transition: all 0.3s ease;
+  min-width: 44px;
+  min-height: 44px;
+  touch-action: manipulation;
 }
 
 .edit-btn {
@@ -214,19 +217,52 @@ body {
 }
 
 @media (max-width: 768px) {
+  body {
+    padding: 10px;
+    font-size: 16px;
+  }
+  
   .container {
-    margin: 10px;
+    margin: 0;
     border-radius: 15px;
+    min-height: calc(100vh - 20px);
+  }
+  
+  .header h1 {
+    font-size: 2em;
   }
   
   .add-todo {
     flex-direction: column;
     gap: 15px;
+    padding: 20px;
+  }
+  
+  .todo-input {
+    font-size: 16px;
+    padding: 12px 20px;
+  }
+  
+  .add-btn {
+    font-size: 16px;
+    padding: 12px 30px;
   }
   
   .stats {
     flex-direction: column;
     gap: 10px;
     text-align: center;
+    padding: 15px;
+  }
+  
+  .todo-item {
+    padding: 15px;
+    flex-wrap: wrap;
+  }
+  
+  .todo-actions {
+    margin-top: 10px;
+    width: 100%;
+    justify-content: center;
   }
 }
