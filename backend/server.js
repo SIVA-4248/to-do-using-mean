@@ -12,6 +12,10 @@ const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/todoap
 
 console.log('🔍 Environment check:');
 console.log('PORT:', PORT);
+console.log('All MongoDB env vars:');
+Object.keys(process.env).filter(key => key.includes('MONGO')).forEach(key => {
+  console.log(`${key}:`, process.env[key] ? 'Set ✅' : 'Not set ❌');
+});
 console.log('MONGODB_URI:', MONGODB_URI ? 'Set ✅' : 'Not set ❌');
 console.log('MongoDB URI (masked):', MONGODB_URI ? MONGODB_URI.replace(/:\/\/.*@/, '://***@') : 'None');
 
@@ -28,8 +32,7 @@ mongoose.connect(MONGODB_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
   serverSelectionTimeoutMS: 5000,
-  socketTimeoutMS: 45000,
-  bufferMaxEntries: 0
+  socketTimeoutMS: 45000
 });
 
 mongoose.connection.on('connected', () => {
