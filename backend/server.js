@@ -59,29 +59,29 @@ mongoose.connection.on('disconnected', () => {
 
 // GET all todos
 app.get('/api/todos', async (req, res) => {
+  console.log('📋 GET /api/todos called');
   try {
-    if (mongoose.connection.readyState !== 1) {
-      return res.json([]);
-    }
     const todos = await Todo.find();
+    console.log('📊 Found todos:', todos.length);
     res.json(todos);
   } catch (error) {
-    console.log('Error fetching todos:', error.message);
+    console.log('❌ Error fetching todos:', error.message);
     res.json([]);
   }
 });
 
 // POST new todo
 app.post('/api/todos', async (req, res) => {
+  console.log('📝 POST /api/todos called with:', req.body);
+  
   try {
-    if (mongoose.connection.readyState !== 1) {
-      return res.status(503).json({ error: 'Database not connected' });
-    }
     const todo = new Todo({ title: req.body.title });
+    console.log('💾 Saving todo:', todo);
     await todo.save();
+    console.log('✅ Todo saved successfully:', todo);
     res.status(201).json(todo);
   } catch (error) {
-    console.log('Error creating todo:', error.message);
+    console.log('❌ Error creating todo:', error.message);
     res.status(400).json({ error: error.message });
   }
 });
