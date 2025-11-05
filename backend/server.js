@@ -272,6 +272,45 @@ app.get('*', (req, res) => {
           list.innerHTML = todos.map(todo => {
             return '<li class="todo-item' + (todo.completed ? ' completed' : '') + '">' +
               '<div class="todo-content">' +
+                '<input type="checkbox" class="todo-checkbox" ' + (todo.completed ? 'checked' : '') + ' onchange="toggleTodo(\'' + todo._id + '\')" />' +
+                '<div class="todo-text"><span class="todo-title">' + todo.title + '</span></div>' +
+              '</div>' +
+              '<div class="todo-actions">' +
+                '<button class="delete-btn" onclick="deleteTodo(\'' + todo._id + '\')" >Delete</button>' +
+              '</div>' +
+            '</li>';
+          }).join('');
+        }
+
+        function updateStats() {
+          const total = todos.length;
+          const completed = todos.filter(t => t.completed).length;
+          const pending = total - completed;
+          
+          document.getElementById('totalCount').textContent = total;
+          document.getElementById('completedCount').textContent = completed;
+          document.getElementById('pendingCount').textContent = pending;
+        }
+
+        // Event listeners
+        document.getElementById('todoInput').addEventListener('keypress', function(e) {
+          if (e.key === 'Enter') addTodo();
+        });
+
+        // Load todos on page load
+        loadTodos();
+      </script>
+    </body>
+    </html>
+  `);
+});
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});isplay = 'none';
+          list.innerHTML = todos.map(todo => {
+            return '<li class="todo-item' + (todo.completed ? ' completed' : '') + '">' +
+              '<div class="todo-content">' +
                 '<input type="checkbox" class="todo-checkbox" ' + (todo.completed ? 'checked' : '') + ' onchange="toggleTodo(\'' + todo._id + '\')"/>' +
                 '<div class="todo-text"><span class="todo-title">' + todo.title + '</span></div>' +
               '</div>' +
