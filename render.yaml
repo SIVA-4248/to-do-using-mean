@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: todo-app
+    env: node
+    buildCommand: npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGODB_URI
+        fromDatabase:
+          name: todo-mongodb
+          property: connectionString
+
+databases:
+  - name: todo-mongodb
+    databaseName: todoapp
+    user: todouser
