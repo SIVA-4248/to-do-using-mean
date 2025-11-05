@@ -8,7 +8,7 @@ const Todo = require('./models/Todo');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const MONGODB_URI = process.env.MONGODB_URI || process.env.MONGO_URL || process.env.DATABASE_URL || process.env.MONGOURL || 'mongodb://localhost:27017/todoapp';
+const MONGODB_URI = process.env.MONGODB_URI || process.env.MONGODB_URL || process.env.MONGO_URL || process.env.DATABASE_URL || 'mongodb://localhost:27017/todoapp';
 
 console.log('🔍 Environment check:');
 console.log('PORT:', PORT);
