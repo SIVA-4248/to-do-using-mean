@@ -467,6 +467,205 @@ app.get('*', (req, res) => {
               document.getElementById('pendingCount').textContent = pending;
             }
 
+            document.getElementById('todoInput').addEventListener('keypress', function(e) {
+              if (e.key === 'Enter') addTodo();
+            });
+
+            loadTodos();
+          </script>
+        </body>
+        </html>
+      `);
+    }
+  });
+});
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});id #4facfe;
+              border-radius: 8px;
+              font-size: 16px;
+              outline: none;
+            }
+            @media (max-width: 768px) {
+              .container { margin: 5px; width: calc(100% - 10px); border-radius: 15px; }
+              .header { padding: 20px 15px; }
+              .header h1 { font-size: 1.8em; }
+              .add-todo { padding: 20px 15px; flex-direction: column; gap: 15px; }
+              .todo-input, .add-btn { font-size: 16px; padding: 15px 20px; width: 100%; }
+              .stats { flex-direction: column; gap: 8px; text-align: center; padding: 15px; }
+              .todo-item { padding: 15px; flex-direction: column; align-items: flex-start; gap: 10px; }
+              .todo-content { width: 100%; }
+              .todo-actions { width: 100%; justify-content: center; gap: 10px; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>📝 My To-Do List</h1>
+              <p class="subtitle">Stay organized and productive</p>
+            </div>
+            
+            <div class="add-todo">
+              <input type="text" id="todoInput" placeholder="What needs to be done?" class="todo-input">
+              <button onclick="addTodo()" class="add-btn">+ Add Task</button>
+            </div>
+
+            <div class="stats">
+              <span class="total">Total: <span id="totalCount">0</span></span>
+              <span class="completed">Completed: <span id="completedCount">0</span></span>
+              <span class="pending">Pending: <span id="pendingCount">0</span></span>
+            </div>
+
+            <ul class="todo-list" id="todoList"></ul>
+            
+            <div id="emptyState" class="empty-state" style="display: none;">
+              <p>🎉 No tasks yet! Add one above to get started.</p>
+            </div>
+          </div>
+
+          <script>
+            let todos = [];
+            let editingId = null;
+
+            async function loadTodos() {
+              try {
+                const response = await fetch('/api/todos');
+                todos = await response.json();
+                renderTodos();
+                updateStats();
+              } catch (error) {
+                console.log('Error loading todos:', error);
+              }
+            }
+
+            async function addTodo() {
+              const input = document.getElementById('todoInput');
+              const title = input.value.trim();
+              if (!title) return;
+              
+              try {
+                const response = await fetch('/api/todos', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ title })
+                });
+                const todo = await response.json();
+                todos.push(todo);
+                input.value = '';
+                renderTodos();
+                updateStats();
+              } catch (error) {
+                console.log('Error adding todo:', error);
+              }
+            }
+
+            async function toggleTodo(id) {
+              const todo = todos.find(t => t._id === id);
+              if (!todo) return;
+              
+              todo.completed = !todo.completed;
+              try {
+                await fetch('/api/todos/' + id, {
+                  method: 'PUT',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(todo)
+                });
+                renderTodos();
+                updateStats();
+              } catch (error) {
+                console.log('Error updating todo:', error);
+              }
+            }
+
+            function startEdit(id) {
+              editingId = id;
+              renderTodos();
+            }
+
+            async function saveEdit(id) {
+              const input = document.querySelector('.edit-input');
+              const title = input.value.trim();
+              if (!title) return;
+              
+              const todo = todos.find(t => t._id === id);
+              todo.title = title;
+              
+              try {
+                await fetch('/api/todos/' + id, {
+                  method: 'PUT',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(todo)
+                });
+                editingId = null;
+                renderTodos();
+              } catch (error) {
+                console.log('Error updating todo:', error);
+              }
+            }
+
+            function cancelEdit() {
+              editingId = null;
+              renderTodos();
+            }
+
+            async function deleteTodo(id) {
+              try {
+                await fetch('/api/todos/' + id, { method: 'DELETE' });
+                todos = todos.filter(t => t._id !== id);
+                renderTodos();
+                updateStats();
+              } catch (error) {
+                console.log('Error deleting todo:', error);
+              }
+            }
+
+            function renderTodos() {
+              const list = document.getElementById('todoList');
+              const emptyState = document.getElementById('emptyState');
+              
+              if (todos.length === 0) {
+                list.innerHTML = '';
+                emptyState.style.display = 'block';
+                return;
+              }
+              
+              emptyState.style.display = 'none';
+              list.innerHTML = todos.map(todo => {
+                const date = new Date(todo.createdAt).toLocaleString();
+                const isEditing = editingId === todo._id;
+                
+                return '<li class="todo-item' + (todo.completed ? ' completed' : '') + '">' +
+                  '<div class="todo-content">' +
+                    '<input type="checkbox" class="todo-checkbox" ' + (todo.completed ? 'checked' : '') + ' onchange="toggleTodo(\'' + todo._id + '\')"/>' +
+                    (isEditing ? 
+                      '<input type="text" class="edit-input" value="' + todo.title + '" onkeyup="if(event.key===\'Enter\')saveEdit(\'' + todo._id + '\'); if(event.key===\'Escape\')cancelEdit()"/>' :
+                      '<div class="todo-text"><span class="todo-title">' + todo.title + '</span><small class="todo-date">' + date + '</small></div>'
+                    ) +
+                  '</div>' +
+                  '<div class="todo-actions">' +
+                    (isEditing ?
+                      '<button class="save-btn" onclick="saveEdit(\'' + todo._id + '\')">✅</button>' +
+                      '<button class="cancel-btn" onclick="cancelEdit()">❌</button>' :
+                      '<button class="edit-btn" onclick="startEdit(\'' + todo._id + '\')">✏️</button>'
+                    ) +
+                    '<button class="delete-btn" onclick="deleteTodo(\'' + todo._id + '\')">🗑️</button>' +
+                  '</div>' +
+                '</li>';
+              }).join('');
+            }
+
+            function updateStats() {
+              const total = todos.length;
+              const completed = todos.filter(t => t.completed).length;
+              const pending = total - completed;
+              
+              document.getElementById('totalCount').textContent = total;
+              document.getElementById('completedCount').textContent = completed;
+              document.getElementById('pendingCount').textContent = pending;
+            }
+
             // Event listeners
             document.getElementById('todoInput').addEventListener('keypress', function(e) {
               if (e.key === 'Enter') addTodo();
