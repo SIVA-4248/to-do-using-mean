@@ -25,8 +25,16 @@ app.use(cors({
 }));
 app.use(bodyParser.json());
 
+// Test route
+app.get('/test', (req, res) => {
+  res.json({ message: 'Server is working!' });
+});
+
 // Serve static files from Angular build
 app.use(express.static(path.join(__dirname, '../frontend/dist/todo-frontend')));
+
+// Also try alternative path
+app.use(express.static(path.join(__dirname, '../frontend/dist')));
 
 mongoose.connect(MONGODB_URI, {
   useNewUrlParser: true,
@@ -100,7 +108,14 @@ app.delete('/api/todos/:id', async (req, res) => {
 
 // Catch all other routes and return the index file
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend/dist/todo-frontend/index.html'));
+  const indexPath = path.join(__dirname, '../frontend/dist/todo-frontend/index.html');
+  console.log('Serving index from:', indexPath);
+  res.sendFile(indexPath, (err) => {
+    if (err) {
+      console.log('Error serving index:', err);
+      res.status(404).send('Frontend not found');
+    }
+  });
 });
 
 app.listen(PORT, () => {
