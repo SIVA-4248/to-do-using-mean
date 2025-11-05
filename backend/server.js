@@ -20,7 +20,7 @@ console.log('MONGODB_URI:', MONGODB_URI ? 'Set ✅' : 'Not set ❌');
 console.log('MongoDB URI (masked):', MONGODB_URI ? MONGODB_URI.replace(/:\/\/.*@/, '://***@') : 'None');
 
 app.use(cors({
-  origin: ['http://localhost:4200', 'https://your-app-name.netlify.app'],
+  origin: ['http://localhost:4200', 'https://to-do-using-mean.onrender.com'],
   credentials: true
 }));
 app.use(bodyParser.json());
