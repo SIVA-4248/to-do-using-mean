@@ -113,7 +113,71 @@ app.get('*', (req, res) => {
   res.sendFile(indexPath, (err) => {
     if (err) {
       console.log('Error serving index:', err);
-      res.status(404).send('Frontend not found');
+      // Fallback HTML with basic todo functionality
+      res.send(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Todo App</title>
+          <meta name="viewport" content="width=device-width, initial-scale=1">
+          <style>
+            body { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; }
+            .todo-input { width: 70%; padding: 10px; margin-right: 10px; }
+            .add-btn { padding: 10px 20px; background: #007bff; color: white; border: none; cursor: pointer; }
+            .todo-item { padding: 10px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; }
+            .delete-btn { background: #dc3545; color: white; border: none; padding: 5px 10px; cursor: pointer; }
+          </style>
+        </head>
+        <body>
+          <h1>📝 Todo App</h1>
+          <div>
+            <input type="text" id="todoInput" placeholder="Add new todo..." class="todo-input">
+            <button onclick="addTodo()" class="add-btn">Add</button>
+          </div>
+          <div id="todoList"></div>
+          <script>
+            let todos = [];
+            async function loadTodos() {
+              try {
+                const response = await fetch('/api/todos');
+                todos = await response.json();
+                renderTodos();
+              } catch (error) { console.log('Error loading todos'); }
+            }
+            async function addTodo() {
+              const input = document.getElementById('todoInput');
+              const title = input.value.trim();
+              if (!title) return;
+              try {
+                const response = await fetch('/api/todos', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ title })
+                });
+                const todo = await response.json();
+                todos.push(todo);
+                input.value = '';
+                renderTodos();
+              } catch (error) { console.log('Error adding todo'); }
+            }
+            async function deleteTodo(id) {
+              try {
+                await fetch('/api/todos/' + id, { method: 'DELETE' });
+                todos = todos.filter(t => t._id != id);
+                renderTodos();
+              } catch (error) { console.log('Error deleting todo'); }
+            }
+            function renderTodos() {
+              const list = document.getElementById('todoList');
+              list.innerHTML = todos.map(todo => 
+                '<div class="todo-item"><span>' + todo.title + '</span><button class="delete-btn" onclick="deleteTodo(\'' + todo._id + '\')">&times;</button></div>'
+              ).join('');
+            }
+            loadTodos();
+          </script>
+        </body>
+        </html>
+      `);
     }
   });
 });
